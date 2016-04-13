@@ -23,6 +23,8 @@ class Offline(object):
 
 	def __init__(self, payload_consumers = []):
 		self.payload_consumers = payload_consumers
+
+		# TODO add a way to configure where the database is saved
 		self.engine = create_engine('sqlite:///%s/sensordata.db' % os.path.dirname(os.path.realpath(__file__)), echo=False)
 		self.Session = sessionmaker(bind=self.engine)
 		self.session = self.Session()
