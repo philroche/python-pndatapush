@@ -4,6 +4,7 @@ from helpers import prompt
 from pndatapush.offline import Offline
 from pndatapush.pushdata import PNPushData
 
+
 def gen_random_decimal(i, d):
 	return decimal.Decimal('%d.%d' % (random.randint(0,i),random.randint(0,d)))
 
