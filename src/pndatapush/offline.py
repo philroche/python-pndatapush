@@ -9,6 +9,7 @@ import time
 
 def active_internet_connection():
 	try:
+		# TODO add a way to configure which IP address to use.
 		#85.91.7.19 is one of the IP-addresses for google.ie
 		response=urllib2.urlopen('http://85.91.7.19', timeout=1)
 		return True

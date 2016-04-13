@@ -17,3 +17,14 @@ Create an instance of the Offline class.
 Then when sensor data is received save the data
 
 `offline.save('12456', 30.00) #save(self, deviceid, payload):`
+
+
+#TODO
+offline.py
+(12, 5) # TODO add a way to configure which IP address to use.
+(28, 5) # TODO add a way to configure where the database is saved
+pushdata.py
+(7, 4) # TODO - add property 'name' for use with logging
+(9, 4) # TODO - add property on whether or not to check if push was successful before marking as sent
+(11, 4) # TODO - add abstract method for checking whether the push was successful.
+(21, 5) # TODO this needs to push to AWS IoT HTTPS API
