@@ -2,10 +2,12 @@
 Python module to push data to the Pervasive Nation IoT network. It saves data locally until there is internet access. 
 
 #To install
-pip install -r requirements.txt
+
+`pip install pndatapush`
 
 #To run an example
-python gatherdata.py
+
+`python examples/gatherdata.py`
 
 #To add to your project
 Create an instance of the Offline class.
