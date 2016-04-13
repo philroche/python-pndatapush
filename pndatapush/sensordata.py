@@ -14,4 +14,4 @@ class SensorData(Base):
 	sent = Column(Boolean, index=True, default=False)
 
 	def __repr__(self):
-		return "<SensorData(timestamp='%s', payload='%s', sent='%s')>" % (self.timestamp, self.payload, self.sent)
+		return "<SensorData(deviceid='%s', timestamp='%s', payload='%s', sent='%s')>" % (self.deviceid, self.timestamp, self.payload, self.sent)

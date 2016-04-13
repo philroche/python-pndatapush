@@ -16,5 +16,5 @@ def wait_for_data():
 		offline.save('123456',sensor_payload)
 
 if __name__ == '__main__':
-	print('runs as a script,',__name__)
+	print('Gather data from console - random defaults are provided')
 	wait_for_data()
