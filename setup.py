@@ -14,6 +14,7 @@ from os.path import splitext
 from setuptools import find_packages
 from setuptools import setup
 from pip.req import parse_requirements
+from src.pndatapush import __version__
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('src/requirements.txt', session=False)
@@ -22,15 +23,12 @@ install_reqs = parse_requirements('src/requirements.txt', session=False)
 # e.g. ['django==1.5.1', 'mezzanine==1.4.6']
 reqs = [str(ir.req) for ir in install_reqs]
 
-from src.pndatapush import __version__
 
 def read(*names, **kwargs):
     return io.open(
         join(dirname(__file__), *names),
         encoding=kwargs.get('encoding', 'utf8')
     ).read()
-
-
 
 setup(
     name='pndatapush',
