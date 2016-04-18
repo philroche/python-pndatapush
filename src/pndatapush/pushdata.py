@@ -11,14 +11,15 @@ class PushDataBase(object):
     # TODO - add abstract method for checking whether the push was successful.
 
     @abstractmethod
-    def push(self, deviceid, timestamp, payload):
+    def push(self, sensordata):
         pass
 
 
 class PNPushData(PushDataBase):
-    name = 'Pervasive nation'
+    name = 'Pervasive Nation'
+    max_retries = 20
 
-    def push(self, deviceid, timestamp, payload):
+    def push(self, sensordata):
         # TODO this needs to push to AWS IoT HTTPS API
-        print('Pushing %s data to PN %s with timestamp %s' % (str(deviceid), str(payload), str(timestamp)))
+        print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid), str(sensordata.payload), str(sensordata.timestamp)))
         return True

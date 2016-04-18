@@ -14,7 +14,10 @@ class SensorDataPushState(Base):
     timestamp = Column(Text, nullable=False)
     consumer = Column(String, index=True, nullable=False)
     sent = Column(Boolean, index=True, default=False)
-    attempts = Column(Integer, default=0)
+    attempts = Column(Integer, nullable=False, default=0)
+
+    # If too many attempts have been made then it will abort trying to send
+    aborted = Column(Boolean, index=True, default=False)
 
     sensordata_id = Column(Integer, ForeignKey('sensordata.id'))
     sensordata = relationship("SensorData", back_populates="consumers")
