@@ -40,8 +40,7 @@ class Offline(object):
         self.start_push_thread()
 
     def save(self, deviceid, payload):
-        payloadobj = SensorData(deviceid=str(deviceid), timestamp=str(datetime.utcnow()), payload=str(payload),
-                                sent=False)
+        payloadobj = SensorData(deviceid=str(deviceid), timestamp=str(datetime.utcnow()), payload=str(payload))
         self.session.add(payloadobj)
         self.session.commit()
 
