@@ -7,29 +7,30 @@ from sqlalchemy.orm import sessionmaker
 from sensordata import SensorData, Base, SensorDataPushState
 from utils import get_or_create
 
+DEFAULT_DB_PATH = 'sqlite:///%s/sensordata.db' % os.path.dirname(os.path.realpath(__file__))
+DEFAULT_IP_ADDRESS = '85.91.7.19'  # 85.91.7.19 is one of the IP-addresses for google.ie
 
-def active_internet_connection():
+
+def active_internet_connection(ipaddress = DEFAULT_IP_ADDRESS):
     try:
-        # TODO add a way to configure which IP address to use.
-        # 85.91.7.19 is one of the IP-addresses for google.ie
-        response = urllib2.urlopen('http://85.91.7.19', timeout=1)
+        response = urllib2.urlopen('http://%s' % ipaddress, timeout=1)
         return True
     except urllib2.URLError as err:
         pass
     return False
 
-DEFAULT_DB_PATH = 'sqlite:///%s/sensordata.db' % os.path.dirname(os.path.realpath(__file__))
 
 class Offline(object):
     session = null
     engine = null
     payload_consumers = []
     dbpath = null
+    ipaddress = null
 
-    def __init__(self, payload_consumers=[], dbpath=DEFAULT_DB_PATH):
+    def __init__(self, payload_consumers=[], dbpath=DEFAULT_DB_PATH, ipaddress=DEFAULT_IP_ADDRESS):
         self.dbpath = dbpath
         self.payload_consumers = payload_consumers
-
+        self.ipaddress = ipaddress
         self.engine = create_engine(self.dbpath,
                                     echo=False)
         self.Session = sessionmaker(bind=self.engine)
@@ -61,13 +62,13 @@ class Offline(object):
         local_session = self.Session()
         while True:  # Infinite loop while parent process is working
             # check if internet access
-            if active_internet_connection():
+            if active_internet_connection(self.ipaddress):
 
-                #unsent_payloads = local_session.query(SensorData).filter(not_(SensorData.sent_count == len(self.payload_consumers)))
                 unsent_sensordata = local_session.query(SensorData).filter_by(sent=False)
 
                 for sensordata in unsent_sensordata:
-                    # print('Pushing [%d] %s (%s) to all consumers' % (payload.id, str(payload.payload), str(payload.timestamp)))
+                    # print('Pushing [%d] %s (%s) to all consumers' %
+                    #                           (payload.id, str(payload.payload), str(payload.timestamp)))
                     for consumer in self.payload_consumers:
                         consumer_obj = consumer()
 
