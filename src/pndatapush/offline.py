@@ -63,17 +63,34 @@ class Offline(object):
             # check if internet access
             if active_internet_connection():
 
-                unsent_payloads = local_session.query(SensorData).filter(not_(SensorData.sent == len(self.payload_consumers)))
+                #unsent_payloads = local_session.query(SensorData).filter(not_(SensorData.sent_count == len(self.payload_consumers)))
+                unsent_payloads = local_session.query(SensorData).filter_by(sent=False)
+
                 for payload in unsent_payloads:
                     # print('Pushing [%d] %s (%s) to all consumers' % (payload.id, str(payload.payload), str(payload.timestamp)))
                     for consumer in self.payload_consumers:
                         consumer_obj = consumer()
-                        consumer_obj.push(payload.deviceid, payload.timestamp, payload.payload)
 
-                        consumer_push_state, created = get_or_create(local_session, SensorDataPushState, defaults={'timestamp':str(datetime.utcnow())}, sensordata_id=payload.id, consumer=str(consumer_obj.name))
-                        consumer_push_state.timestamp = str(datetime.utcnow())
-                        consumer_push_state.sent = True
+                        # get SensorDataPushState entry for this payload. If it doesn't exist. Create it
+                        consumer_push_state, created = get_or_create(local_session, SensorDataPushState,
+                                                                     defaults={'timestamp': str(datetime.utcnow())},
+                                                                     sensordata_id=payload.id,
+                                                                     consumer=str(consumer_obj.name))
+                        # check to see if has been sent already. it's it's just beeen created then the answer is no
+                        if created or not consumer_push_state.sent:
+                            # we need to check that it was successful.
+                            push_success = consumer_obj.push(payload.deviceid, payload.timestamp, payload.payload)
 
-                        local_session.add(consumer_push_state)
+                            consumer_push_state.attempts += 1 # add one to the number of attempts
+                            consumer_push_state.timestamp = str(datetime.utcnow())
+
+                            if push_success:
+                                consumer_push_state.sent = True
+
+                                # check to see if there are any more consumers of this data left to push.
+                                # if not then we can now mark it as sent
+                                if payload.notsent_count == 0:
+                                    payload.sent = True
+
                         local_session.commit()
 

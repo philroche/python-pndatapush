@@ -14,6 +14,7 @@ class SensorDataPushState(Base):
     timestamp = Column(Text, nullable=False)
     consumer = Column(String, index=True, nullable=False)
     sent = Column(Boolean, index=True, default=False)
+    attempts = Column(Integer, default=0)
 
     sensordata_id = Column(Integer, ForeignKey('sensordata.id'))
     sensordata = relationship("SensorData", back_populates="consumers")
@@ -30,9 +31,12 @@ class SensorData(Base):
     deviceid = Column(String, index=True, nullable=False)
     payload = Column(String, nullable=False)
 
-    sent = column_property(
+    sent = Column(Boolean, index=True, default=False)
+
+    #count for how many have not been sent
+    notsent_count = column_property(
             select([func.count(SensorDataPushState.id)]).
-            where(and_(SensorDataPushState.sent == True, SensorDataPushState.sensordata_id == id)).
+            where(and_(SensorDataPushState.sent == False, SensorDataPushState.sensordata_id == id)).
             correlate_except(SensorDataPushState)
     )
 

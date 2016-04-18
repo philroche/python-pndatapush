@@ -21,3 +21,4 @@ class PNPushData(PushDataBase):
     def push(self, deviceid, timestamp, payload):
         # TODO this needs to push to AWS IoT HTTPS API
         print('Pushing %s data to PN %s with timestamp %s' % (str(deviceid), str(payload), str(timestamp)))
+        return True
