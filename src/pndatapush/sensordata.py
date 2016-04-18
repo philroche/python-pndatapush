@@ -33,13 +33,6 @@ class SensorData(Base):
 
     sent = Column(Boolean, index=True, default=False)
 
-    #count for how many have not been sent
-    notsent_count = column_property(
-            select([func.count(SensorDataPushState.id)]).
-            where(and_(SensorDataPushState.sent == False, SensorDataPushState.sensordata_id == id)).
-            correlate_except(SensorDataPushState)
-    )
-
     consumers = relationship("SensorDataPushState", order_by=SensorDataPushState.id, back_populates="sensordata")
 
     def __repr__(self):

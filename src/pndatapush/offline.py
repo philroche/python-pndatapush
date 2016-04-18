@@ -89,7 +89,8 @@ class Offline(object):
 
                                 # check to see if there are any more consumers of this data left to push.
                                 # if not then we can now mark it as sent
-                                if payload.notsent_count == 0:
+                                if(local_session.query(func.count(SensorDataPushState.id)).filter_by(sensordata_id=payload.id,
+                                                                                                     sent=False) == 0):
                                     payload.sent = True
 
                         local_session.commit()
