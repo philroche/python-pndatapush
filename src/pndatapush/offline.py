@@ -1,11 +1,11 @@
-from datetime import datetime
-from sensordata import SensorData, Base
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
+import urllib2
 import os
 from threading import Thread
-import urllib2
-import time
+from datetime import datetime
+from sqlalchemy import *
+from sqlalchemy.orm import sessionmaker
+from sensordata import SensorData, Base, SensorDataPushState
+from utils import get_or_create
 
 
 def active_internet_connection():
@@ -63,12 +63,18 @@ class Offline(object):
         while True:  # Infinite loop while parent process is working
             # check if internet access
             if active_internet_connection():
-                for payload in local_session.query(SensorData).filter_by(sent=False):
+
+                unsent_payloads = local_session.query(SensorData).filter(not_(SensorData.sent == len(self.payload_consumers)))
+                for payload in unsent_payloads:
                     # print('Pushing [%d] %s (%s) to all consumers' % (payload.id, str(payload.payload), str(payload.timestamp)))
                     for consumer in self.payload_consumers:
                         consumer_obj = consumer()
                         consumer_obj.push(payload.deviceid, payload.timestamp, payload.payload)
 
-                        # TODO 'sent' field should be per consumer (if they are configured to expect a successful response)
-                        payload.sent = True
+                        consumer_push_state, created = get_or_create(local_session, SensorDataPushState, defaults={'timestamp':str(datetime.utcnow())}, sensordata_id=payload.id, consumer=str(consumer_obj.name))
+                        consumer_push_state.timestamp = str(datetime.utcnow())
+                        consumer_push_state.sent = True
+
+                        local_session.add(consumer_push_state)
                         local_session.commit()
+
