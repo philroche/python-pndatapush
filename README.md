@@ -20,11 +20,8 @@ Then when sensor data is received save the data
 
 
 #TODO
-offline.py
-(12, 5) # TODO add a way to configure which IP address to use.
-(72, 27) # TODO 'sent' field should be per consumer (if they are configured to expect a successful response)
 pushdata.py
-(7, 4) # TODO - add property 'name' for use with logging
-(9, 4) # TODO - add property on whether or not to check if push was successful before marking as sent
-(11, 4) # TODO - add abstract method for checking whether the push was successful.
-(21, 5) # TODO this needs to push to AWS IoT HTTPS API
+(7, 7) # TODO - add property 'name' for use with logging
+(9, 7) # TODO - add property on whether or not to check if push was successful before marking as sent
+(11, 7) # TODO - add abstract method for checking whether the push was successful.
+(23, 11) # TODO this needs to push to AWS IoT HTTPS API
