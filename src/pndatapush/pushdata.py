@@ -1,3 +1,6 @@
+import requests
+import json
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -20,6 +23,15 @@ class PNPushData(PushDataBase):
     max_retries = 20
 
     def push(self, sensordata):
-        # TODO this needs to push to AWS IoT HTTPS API
         print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid), str(sensordata.payload), str(sensordata.timestamp)))
-        return True
+        payload = {"payload": str(sensordata.payload)}
+        headers = {"Authorization": "Bearer MYREALLYLONGTOKENIGOT"}
+        #url = 'https://api.pervasivenation.com'
+        url = 'http://127.0.0.1:8000/publish'
+        try:
+            r = requests.post(url, data=json.dumps(payload), headers=headers)
+            if r.status_code == 200:
+                return True
+        except requests.ConnectionError as conn_error:
+            pass
+        return False
