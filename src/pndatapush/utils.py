@@ -1,6 +1,10 @@
 from sqlalchemy.sql.expression import ClauseElement
 
 
+def str2bool(v):
+    return str(v).lower() in ["yes", "true", "t", "1"]
+
+
 def get_or_create(session, model, defaults=None, **kwargs):
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
