@@ -30,11 +30,7 @@ class PNPushData(PushDataBase):
                    "content-type": "application/json",
                    "Accept": "application/json"}
 
-        url = 'https://api.pervasivenation.com'
-
-        # If we are not using this in production then use a local url
-        if not str2bool(os.environ.get('PNDATAPUSH_PRODUCTION', True)):
-            url = 'http://127.0.0.1:8000/publish'
+        url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com')
 
         try:
             r = requests.post(url, json=payload, headers=headers)
