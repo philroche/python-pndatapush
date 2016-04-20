@@ -1,5 +1,6 @@
 import urllib2
 import os
+import logging
 from threading import Thread
 from datetime import datetime
 from sqlalchemy import *
@@ -67,8 +68,6 @@ class Offline(object):
                 unsent_sensordata = local_session.query(SensorData).filter_by(sent=False)
 
                 for sensordata in unsent_sensordata:
-                    # print('Pushing [%d] %s (%s) to all consumers' %
-                    #                           (payload.id, str(payload.payload), str(payload.timestamp)))
                     for consumer in self.payload_consumers:
                         consumer_obj = consumer()
 
@@ -84,14 +83,14 @@ class Offline(object):
                             # we need to check that it was successful.
                             push_success = consumer_obj.push(sensordata)
 
-                            consumer_push_state.attempts += 1 # add one to the number of attempts
+                            consumer_push_state.attempts += 1  # add one to the number of attempts
                             consumer_push_state.timestamp = str(datetime.utcnow())
 
                             if push_success:
                                 consumer_push_state.sent = True
                             else:
                                 if consumer_push_state.attempts > consumer_obj.max_retries:
-                                    print('%s push aborted after too many retries' % consumer_push_state)
+                                    logging.error('%s push aborted after too many retries' % consumer_push_state)
                                     consumer_push_state.aborted = True
 
                             # check to see if there are any more consumers of this data left to push.

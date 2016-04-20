@@ -1,17 +1,31 @@
 import requests
 import os
-from abc import ABCMeta, abstractmethod
-from utils import str2bool
+from abc import ABCMeta, abstractmethod, abstractproperty
+import logging
 
 
 class PushDataBase(object):
     __metaclass__ = ABCMeta
 
-    # TODO - add property 'name' for use with logging
+    # property 'name' for use with logging
+    @abstractproperty
+    def name(self):
+        pass
 
-    # TODO - add property on whether or not to check if push was successful before marking as sent
+    # property on whether or not to check if push was successful before marking as sent
+    @abstractproperty
+    def check_for_success(self):
+        pass
 
-    # TODO - add abstract method for checking whether the push was successful.
+    # property for number of max retries before aborting. This should be dependant on check_for_success
+    @abstractproperty
+    def max_retries(self):
+        pass
+
+    # add method for checking whether the push was successful.
+    @abstractmethod
+    def issuccess(self, response):
+        pass
 
     @abstractmethod
     def push(self, sensordata):
@@ -21,9 +35,31 @@ class PushDataBase(object):
 class PNPushData(PushDataBase):
     name = 'Pervasive Nation'
     max_retries = 20
+    check_for_success = True
+
+    def issuccess(self, response):
+        status = True
+        if self.check_for_success:
+            if response.status_code == 200:
+                status = True
+            elif response.status_code == 401: # 401 Unauthorized.
+                logging.error('Authorization token is incorrect or not set. '
+                              'Use environment variable PERVASIVENATION_AUTHTOKEN to set token.')
+                status = False
+            elif response.status_code == 406:  # HTTP_406, 'Media type not acceptable'
+                logging.error('You must be able to receive JSON (applicaiton/json) as response from the '
+                              'Pervasive nation API. Any other media type is not accepted')
+                status = False
+            elif response.status_code == 415:  # HTTP_415, 'Unsupported media type'
+                logging.error('You must post JSON (applicaiton/json) to Pervasive nation API. '
+                              'Any other media type is not accepted')
+                status = False
+
+        return status
 
     def push(self, sensordata):
-        print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid), str(sensordata.payload), str(sensordata.timestamp)))
+        print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid),
+                                                                   str(sensordata.payload), str(sensordata.timestamp)))
         payload = {"payload": str(sensordata.payload)}
 
         headers = {"Authorization": "Bearer %s" % os.environ.get('PERVASIVENATION_AUTHTOKEN', None),
@@ -33,21 +69,10 @@ class PNPushData(PushDataBase):
         url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com')
 
         try:
-            r = requests.post(url, json=payload, headers=headers)
-            if r.status_code == 200:
-                return True
-            elif r.status_code == 401: # 401 Unauthorized.
-                # TODO use logging library rather than print statements
-                print('Authorization token is incorrect or not set. '
-                      'Use environment variable PERVASIVENATION_AUTHTOKEN to set token.')
-            elif r.status_code == 406: # HTTP_406, 'Media type not acceptable'
-                print('You must be able to receive JSON (applicaiton/json) as response from the '
-                      'Pervasive nation API. Any other media type is not accepted')
-            elif r.status_code == 415: #  HTTP_415, 'Unsupported media type'
-                print('You must post JSON (applicaiton/json) to Pervasive nation API. '
-                      'Any other media type is not accepted')
+            response = requests.post(url, json=payload, headers=headers)
 
-            return False
+            return self.issuccess(response)
         except requests.ConnectionError as conn_error:
-            print('There was a connection error connecting to Pervasive Nation.')
-        return False
+            logging.error('There was a connection error connecting to Pervasive Nation.')
+        # if check_for_success is False then we don't care if it was successful
+        return False if self.check_for_success else True
