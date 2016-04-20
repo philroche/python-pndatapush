@@ -1,8 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import column_property
-from sqlalchemy import select, func
 
 Base = declarative_base()
 
