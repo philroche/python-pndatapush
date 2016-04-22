@@ -60,7 +60,7 @@ class PNPushData(PushDataBase):
     def push(self, sensordata):
         print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid),
                                                                    str(sensordata.payload), str(sensordata.timestamp)))
-        payload = {"payload": str(sensordata.payload)}
+
         sensor_data = {
             "rx": {
                 "moteeui": str(sensordata.deviceid),
@@ -68,9 +68,20 @@ class PNPushData(PushDataBase):
                     "seqno": 0,
                     "port": 1,
                     "payload": str(sensordata.payload)
+                },
+                "gwrx": [
+                        {
+                            "eui": "0000000000000000",
+                            "time": str(sensordata.timestamp),
+                            "chan": 0,
+                            "rfch": 1,
+                            "rssi": -56,
+                            "lsnr": "7"
+                        }
+                    ]
                 }
             }
-        }
+
 
         headers = {"Authorization": "Bearer %s" % os.environ.get('PERVASIVENATION_AUTHTOKEN', None),
                    "content-type": "application/json",
