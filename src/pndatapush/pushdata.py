@@ -61,6 +61,16 @@ class PNPushData(PushDataBase):
         print('Pushing [%d] %s data to PN %s with timestamp %s' % (sensordata.id, str(sensordata.deviceid),
                                                                    str(sensordata.payload), str(sensordata.timestamp)))
         payload = {"payload": str(sensordata.payload)}
+        sensor_data = {
+            "rx": {
+                "moteeui": str(sensordata.deviceid),
+                "userdata": {
+                    "seqno": 0,
+                    "port": 1,
+                    "payload": str(sensordata.payload)
+                }
+            }
+        }
 
         headers = {"Authorization": "Bearer %s" % os.environ.get('PERVASIVENATION_AUTHTOKEN', None),
                    "content-type": "application/json",
@@ -69,7 +79,7 @@ class PNPushData(PushDataBase):
         url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com')
 
         try:
-            response = requests.post(url, json=payload, headers=headers)
+            response = requests.post(url, json=sensor_data, headers=headers)
 
             return self.issuccess(response)
         except requests.ConnectionError as conn_error:
