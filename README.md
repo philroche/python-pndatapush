@@ -20,8 +20,4 @@ Then when sensor data is received save the data
 
 
 #TODO
-pushdata.py
-(7, 7) # TODO - add property 'name' for use with logging
-(9, 7) # TODO - add property on whether or not to check if push was successful before marking as sent
-(11, 7) # TODO - add abstract method for checking whether the push was successful.
-(23, 11) # TODO this needs to push to AWS IoT HTTPS API
+PI
