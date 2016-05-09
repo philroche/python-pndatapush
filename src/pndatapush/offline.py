@@ -7,6 +7,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from sensordata import SensorData, Base, SensorDataPushState
 from utils import get_or_create
+from pushdata import PushDataBase
 
 DEFAULT_DB_PATH = 'sqlite:///%s/sensordata.db' % os.path.dirname(os.path.realpath(__file__))
 DEFAULT_IP_ADDRESS = '85.91.7.19'  # 85.91.7.19 is one of the IP-addresses for google.ie
@@ -32,6 +33,7 @@ class Offline(object):
         self.dbpath = dbpath
         self.payload_consumers = payload_consumers
         self.ipaddress = ipaddress
+
         self.engine = create_engine(self.dbpath,
                                     echo=False)
         self.Session = sessionmaker(bind=self.engine)
@@ -69,7 +71,10 @@ class Offline(object):
 
                 for sensordata in unsent_sensordata:
                     for consumer in self.payload_consumers:
-                        consumer_obj = consumer()
+                        if not isinstance(consumer, PushDataBase):
+                            consumer_obj = consumer()
+                        else:
+                            consumer_obj = consumer
 
                         # get SensorDataPushState entry for this payload. If it doesn't exist. Create it
                         consumer_push_state, created = get_or_create(local_session, SensorDataPushState,

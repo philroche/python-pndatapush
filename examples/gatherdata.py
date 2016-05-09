@@ -1,5 +1,6 @@
 import random
 import decimal
+import os
 from helpers import prompt
 from pndatapush.offline import Offline
 from pndatapush.pushdata import PNPushData
@@ -10,7 +11,11 @@ def gen_random_decimal(i, d):
 
 
 def wait_for_data():
-    offline = Offline(payload_consumers=[PNPushData])
+    #Set the PervasiveNation Auth token
+    pnpushdata = PNPushData(pervasivenation_authtoken="MYREALLYLONGTOKENIGOTSECRET")
+    #Set the local SQLite DB path
+    offline = Offline(payload_consumers=[pnpushdata], dbpath='sqlite:///%s/sensordata.db' % os.path.dirname(os.path.realpath(__file__)))
+
     while True:
         sensor_payload = prompt('Enter Sensor Data', default=gen_random_decimal(35, 99))
         print('Pushing %s to your AEP of choice ' % str(sensor_payload))

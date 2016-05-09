@@ -2,6 +2,7 @@ import requests
 import os
 from abc import ABCMeta, abstractmethod, abstractproperty
 import logging
+from base64 import b64encode
 
 
 class PushDataBase(object):
@@ -36,6 +37,10 @@ class PNPushData(PushDataBase):
     name = 'Pervasive Nation'
     max_retries = 20
     check_for_success = True
+    pervasivenation_authtoken = None
+
+    def __init__(self, pervasivenation_authtoken=os.environ.get('PERVASIVENATION_AUTHTOKEN', None)):
+        self.pervasivenation_authtoken = pervasivenation_authtoken
 
     def issuccess(self, response):
         status = True
@@ -67,7 +72,7 @@ class PNPushData(PushDataBase):
                 "userdata": {
                     "seqno": 0,
                     "port": 1,
-                    "payload": str(sensordata.payload)
+                    "payload": b64encode(str(sensordata.payload))
                 },
                 "gwrx": [
                         {
@@ -82,12 +87,11 @@ class PNPushData(PushDataBase):
                 }
             }
 
-
-        headers = {"Authorization": "Bearer %s" % os.environ.get('PERVASIVENATION_AUTHTOKEN', None),
+        headers = {"Authorization": "Bearer %s" % self.pervasivenation_authtoken,
                    "content-type": "application/json",
                    "Accept": "application/json"}
 
-        url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com')
+        url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com/publish')
 
         try:
             response = requests.post(url, json=sensor_data, headers=headers)
