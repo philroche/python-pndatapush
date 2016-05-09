@@ -4,7 +4,7 @@ Python module to push data to the Pervasive Nation IoT network. It saves data lo
 #To install
 
 ```python
-pip install pndatapush
+pip install --upgrade pndatapush
 ```
 
 #To run an example
