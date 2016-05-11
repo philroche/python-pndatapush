@@ -38,9 +38,12 @@ class PNPushData(PushDataBase):
     max_retries = 20
     check_for_success = True
     pervasivenation_authtoken = None
+    pervasivenation_response_timeout = None
 
-    def __init__(self, pervasivenation_authtoken=os.environ.get('PERVASIVENATION_AUTHTOKEN', None)):
+    def __init__(self, pervasivenation_authtoken=os.environ.get('PERVASIVENATION_AUTHTOKEN', None),
+                 pervasivenation_response_timeout=os.environ.get('PERVASIVENATION_RESPONSE_TIMEOUT', 5)):
         self.pervasivenation_authtoken = pervasivenation_authtoken
+        self.pervasivenation_response_timeout = pervasivenation_response_timeout
 
     def issuccess(self, response):
         status = True
@@ -94,7 +97,8 @@ class PNPushData(PushDataBase):
         url = os.environ.get('PNDATAPUSH_PNAPI_URL', 'https://api.pervasivenation.com/publish')
 
         try:
-            response = requests.post(url, json=sensor_data, headers=headers)
+            # wait three seconds for response
+            response = requests.post(url, json=sensor_data, headers=headers, timeout=self.pervasivenation_response_timeout)
 
             return self.issuccess(response)
         except requests.ConnectionError as conn_error:
