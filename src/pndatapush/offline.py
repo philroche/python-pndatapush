@@ -17,8 +17,10 @@ def active_internet_connection(ipaddress = DEFAULT_IP_ADDRESS):
     try:
         response = urllib2.urlopen('http://%s' % ipaddress, timeout=1)
         return True
-    except urllib2.URLError as err:
-        pass
+    except urllib2.URLError as url_err:
+        pass  # there was a urllib2 exception - we don't really care why as we know that we don't have internet access
+    except Exception as unknown_error:
+        pass  # there was an unknown exception - we don't really care why as we know that we don't have internet access
     return False
 
 

@@ -99,5 +99,9 @@ class PNPushData(PushDataBase):
             return self.issuccess(response)
         except requests.ConnectionError as conn_error:
             logging.error('There was a connection error connecting to Pervasive Nation.')
+            logging.error(conn_error)
+        except Exception as unknown_error:
+            logging.error('There was an unrecognised connection error connecting to Pervasive Nation.')
+            logging.error(unknown_error)
         # if check_for_success is False then we don't care if it was successful
         return False if self.check_for_success else True
